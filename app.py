@@ -1,70 +1,139 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jun  8 22:39:07 2020
+
+@author: Giovanna Gehring
+"""
+
+#importar pacotes necessários
+
+import pandas as pd
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.graph_objects as go
-import pandas as pd
-import numpy as np
+from dash.dependencies import Input, Output
+import plotly.graph_objs as go
+import plotly.offline as pyo
+import plotly.express as px
+from dash.dependencies import Input, Output
 
-# Dataset 'Processing'
+app = dash.Dash()
 
-df_emissions = pd.read_csv('emission_full.csv')
 
-df_emission_0 = df_emissions.loc[df_emissions['year']==2000]
+#importar dataset
+df = pd.read_csv("SAMPLE_ENEM3.csv", delimiter=",", encoding="utf8")
 
-# Building our Graphs (nothing new here)
 
-data_choropleth = dict(type='choropleth',
-                       locations=df_emission_0['country_name'],  #There are three ways to 'merge' your data with the data pre embedded in the map
-                       locationmode='country names',
-                       z=np.log(df_emission_0['CO2_emissions']),
-                       text=df_emission_0['country_name'],
-                       colorscale='inferno',
-                       colorbar=dict(title='CO2 Emissions log scaled')
-                      )
+#criar variáveis para usar no dropdown
+x_escolhas = [
+    {"label": "Classe Social", "value": "social"},
+    {"label": "Tipo de Escola", "value": "escola"},
+    {"label": "Raça", "value": "raca"},
+    {"label": "Nível Educação Pai", "value": "edu_pai"},
+    {"label": "Nível Educação Mãe", "value": "edu_mae"}
+]
 
-layout_choropleth = dict(geo=dict(scope='world',  #default
-                                  projection=dict(type='orthographic'
-                                                 ),
-                                  #showland=True,   # default = True
-                                  landcolor='black',
-                                  lakecolor='white',
-                                  showocean=True,   # default = False
-                                  oceancolor='azure'
-                                 ),
-                         
-                         title=dict(text='World Choropleth Map',
-                                    x=.5 # Title relative position according to the xaxis, range (0,1)
-                                   )
-                        )
-
-fig = go.Figure(data=data_choropleth, layout=layout_choropleth)
+y_escolhas = [
+    {"label": "Nota Total", "value": "total"},
+    {"label": "Nota Redação", "value": "redacao"},
+    {"label": "Nota Linguagens e Códigos", "value": "linguagem"},
+    {"label": "Nota Matematica", "value": "matematica"},
+    {"label": "Nota Ciências da Natureza", "value": "natureza"},
+    {"label": "Nota Ciências Humanas", "value": "humanas"}
+]
 
 
 
-# The App itself
+#app layout
+app.layout = html.Div([
 
-app = dash.Dash(__name__)
-
-server = app.server
-
-
-
-
-app.layout = html.Div(children=[
-    html.H1(children='My First DashBoard'),
-
-    html.Div(children='''
-        Example of html Container
-    '''),
-
-    dcc.Graph(
-        id='example-graph',
-        figure=fig
-    )
+#titulo    
+             html.H1("Enem Dashboard"),
+    
+#nome do dropdown    
+    
+             html.Label("Variável Socioeconómica"),
+                   
+#dropdown x_axis
+    
+             dcc.Dropdown(
+             id = "socioeconomico",
+             options=x_escolhas,
+             value="social"
+             ),   
+    
+#nome do dropdown    
+    
+             html.Label("Variáveis de Desempenho"),
+                   
+    
+#dropdown y_axis
+    
+             dcc.Dropdown(
+             id = "desempenho",
+             options=y_escolhas,
+             value="total"
+             ),   
+    
+    
+#box plot
+             dcc.Graph(id="boxplot"),
+        
+    
 ])
 
 
+#callbacks
 
+@app.callback(Output("boxplot", "figure"),
+             [Input("socioeconomico", "value"),
+             Input("desempenho", "value")])
+
+def update_figure(selectedx, selectedy): 
+
+#valores da axis x
+    if "social" in selectedx:
+        x_box = df["GRUPO_SOCIAL"]
+    if "escola" in selectedx:
+        x_box = df["TIPO_ESCOLA"]
+    if "raca" in selectedx:
+        x_box = df["TP_COR_RACA"]
+    if "edu_pai" in selectedx:
+        x_box = df["EDUCACAO_PAI"]
+    if "edu_mae" in selectedx:
+        x_box = df["EDUCACAO_MAE"]
+
+#valores da axis y
+    if "total" in selectedy:
+        y_box = df["NU_NOTA_TOTAL"]
+    if "natureza" in selectedy:
+        y_box = df["NU_NOTA_CN"]
+    if "matematica" in selectedy:
+        y_box = df["NU_NOTA_MT"]
+    if "linguagem" in selectedy:
+        y_box = df["NU_NOTA_LC"]
+    if "humanas" in selectedy:
+        y_box = df["NU_NOTA_CH"]
+    if "redacao" in selectedy:
+        y_box = df["NU_NOTA_REDACAO"]
+
+    return px.box(df,
+            x=y_box,
+            y=x_box,
+            color=x_box,
+            points="outliers",
+            orientation="h", #se quisermos o normal, tirar essa parte e mudar x e y
+            #range_x=[100,1000],
+            boxmode="overlay",
+            category_orders={"GRUPO_SOCIAL": ["Classe A e B", "Classe C", "Classe D e E"],
+                             "TIPO_ESCOLA": ["Escola Privada", "Parte em Pública e parte em Privada", "Escola Pública"],
+                             "TP_COR_RACA": ["Branca", "Amarela", "Parda", "Preta", "Indígena", "Não declarado"],
+                             "EDUCACAO_PAI": ["Pós-graduação", "Ensino Superior", "Ensino Médio", "Ensino Fundamental", "Nunca estudou ou fundamental incompleto", "Não sei"],
+                             "EDUCACAO_MAE": ["Pós-graduação", "Ensino Superior", "Ensino Médio", "Ensino Fundamental", "Nunca estudou ou fundamental incompleto", "Não sei"]},
+            labels={"GRUPO_SOCIAL": "Classe Social",  "TIPO_ESCOLA": "Tipo de Escola", "TP_COR_RACA": "Raça", "EDUCACAO_PAI":"Nível Educação Pai", "EDUCACAO_MAE":"Nível Educação Mãe",
+                    "NU_NOTA_TOTAL":"Nota Final", "NU_NOTA_CN":"Nota Ciências da Natureza", "NU_NOTA_CH":"Nota Ciências Humanas", "NU_NOTA_REDACAO":"Nota Redação",
+                    "NU_NOTA_LC":"Nota Linguagens e Códigos", "NU_NOTA_MT":"Nota Matemática"
+                   })
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
