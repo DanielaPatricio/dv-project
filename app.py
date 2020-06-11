@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jun  8 22:39:07 2020
-
-@author: Giovanna Gehring
-"""
-
 #importar pacotes necessários
 
 import pandas as pd
@@ -16,9 +9,11 @@ import plotly.graph_objs as go
 import plotly.offline as pyo
 import plotly.express as px
 from dash.dependencies import Input, Output
+import numpy as np
+import urllib.request, json
+import base64
 
-
-
+#iniciar app
 app = dash.Dash(__name__)
 
 server = app.server
@@ -26,8 +21,29 @@ server = app.server
 #importar dataset
 df = pd.read_csv("SAMPLE_ENEM3.csv", delimiter=",", encoding="utf8")
 
+#df para o mapa
+mapa = df[["SG_UF_RESIDENCIA", "Unidade federativa", "NU_NOTA_TOTAL", "NU_NOTA_REDACAO", "NU_NOTA_CN","NU_NOTA_MT", "NU_NOTA_LC", "NU_NOTA_REDACAO"]]
 
-#criar variáveis para usar no dropdown
+df_mapa = mapa.groupby(df["Unidade federativa"]).mean().reset_index()
+df_mapa.head()
+
+#caminho do geojson com o mapa do Brasil
+geo_path = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson'
+
+#assignar o geojson a uma variável
+with urllib.request.urlopen(geo_path) as url:
+    data_geo = json.loads(url.read().decode())
+
+#mapear feature id ao nome do estado do mapa geojson
+for feature in data_geo['features']:
+    feature['id'] = feature['properties']['name']
+
+#configurações da imagem
+image_filename = 'enemicon.png'
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+
+#criar variáveis para usar nos dropdowns
+
 x_escolhas = [
     {"label": "Classe Social", "value": "social"},
     {"label": "Tipo de Escola", "value": "escola"},
@@ -45,85 +61,142 @@ y_escolhas = [
     {"label": "Nota Ciências Humanas", "value": "humanas"}
 ]
 
-
-
 #app layout
 app.layout = html.Div([
 
 #titulo    
-             html.H1("Enem Dashboard"),
-    
-#nome do dropdown    
-    
-             html.Label("Variável Socioeconómica"),
-                   
-#dropdown x_axis
-    
-             dcc.Dropdown(
-             id = "socioeconomico",
-             options=x_escolhas,
-             value="social"
-             ),   
-    
-#nome do dropdown    
-    
-             html.Label("Variáveis de Desempenho"),
-                   
-    
-#dropdown y_axis
-    
+
+            html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())),
+
+# espaçamento entre objectos
+            dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões alunos Brasileiros com fim a ingressar no Ensino Superior. "
+                 "O objectivo deste dashboard é apresentar as diferenças ao nível do desempenho dos alunos nas suas variáveis socioeconómicas. "
+                 ),
+
+# espaçamento entre objectos
+            html.Br(),
+
+#nome do dropdown 2
+             html.Label("Variável de Desempenho,"),
+
+#dropdown 3
              dcc.Dropdown(
              id = "desempenho",
              options=y_escolhas,
              value="total"
-             ),   
-    
-    
-#box plot
+             ),
+# espaçamento entre objectos
+             html.Br(),
+
+#map
+            dcc.Graph(id="map"),
+
+# nome do dropdown 2
+            html.Label("Variável Socioeconómica"),
+
+#dropdown 2
+            dcc.Dropdown(
+            id="socioeconomico",
+            options=x_escolhas,
+            value="social"
+            ),
+
+
              dcc.Graph(id="boxplot"),
-        
-    
+
+
 ])
 
+#callback1
+@app.callback(Output("map", "figure"),
+             [Input("desempenho", "value")])
 
-#callbacks
+def update_figure(selectedy):
 
+    if "total" in selectedy:
+        y_1 = round(df_mapa["NU_NOTA_TOTAL"],2)
+        x = df_mapa["Unidade federativa"]
+        minmed = round(min(df_mapa["NU_NOTA_TOTAL"]),2)
+        maxmed = round(max(df_mapa["NU_NOTA_TOTAL"]),2)
+
+    if "natureza" in selectedy:
+        y_1 = round(df_mapa["NU_NOTA_CN"], 2)
+        x = df_mapa["Unidade federativa"]
+        minmed = round(min(df_mapa["NU_NOTA_CN"]),2)
+        maxmed = round(max(df_mapa["NU_NOTA_CN"]),2)
+
+    if "matematica" in selectedy:
+        y_1 = round(df_mapa["NU_NOTA_MT"], 2)
+        x = df_mapa["Unidade federativa"]
+        minmed = round(min(df_mapa["NU_NOTA_MT"]),2)
+        maxmed = round(max(df_mapa["NU_NOTA_MT"]),2)
+
+    if "linguagem" in selectedy:
+        y_1 = round(df_mapa["NU_NOTA_LC"], 2)
+        x = df_mapa["Unidade federativa"]
+        minmed = round(min(df_mapa["NU_NOTA_LC"]),2)
+        maxmed = round(max(df_mapa["NU_NOTA_LC"]),2)
+
+    if "humanas" in selectedy:
+        y_1 = round(df_mapa["NU_NOTA_CH"], 2)
+        x = df_mapa["Unidade federativa"]
+        minmed = round(min(df_mapa["NU_NOTA_CH"]),2)
+        maxmed = round(max(df_mapa["NU_NOTA_CH"]),2)
+
+    if "redacao" in selectedy:
+        y_1 = round(df_mapa["NU_NOTA_REDACAO"], 2)
+        x = df_mapa["Unidade federativa"]
+        minmed = round(min(df_mapa["NU_NOTA_REDACAO"]),2)
+        maxmed = round(max(df_mapa["NU_NOTA_REDACAO"]),2)
+
+#configuração e apresentação do mapa
+    return px.choropleth_mapbox(df_mapa, geojson=data_geo, locations=x, color=y_1,
+                           color_continuous_scale="Viridis",
+                           range_color=(minmed, maxmed),
+                           mapbox_style="carto-positron",
+                           center={"lat": -15.4357, "lon": -53.8510},
+                           zoom=3.75,
+                           opacity=0.5,
+                           labels={"locations": "Estado", "color": "Nota Média"}
+                           )
+
+#callback2
 @app.callback(Output("boxplot", "figure"),
              [Input("socioeconomico", "value"),
              Input("desempenho", "value")])
 
-def update_figure(selectedx, selectedy): 
+def update_figure(selectedx, selectedy):
 
-#valores da axis x
+#valores da variável de socioeconómica
     if "social" in selectedx:
-        x_box = df["GRUPO_SOCIAL"]
+        x_2 = df["GRUPO_SOCIAL"]
     if "escola" in selectedx:
-        x_box = df["TIPO_ESCOLA"]
+        x_2 = df["TIPO_ESCOLA"]
     if "raca" in selectedx:
-        x_box = df["TP_COR_RACA"]
+        x_2 = df["TP_COR_RACA"]
     if "edu_pai" in selectedx:
-        x_box = df["EDUCACAO_PAI"]
+        x_2 = df["EDUCACAO_PAI"]
     if "edu_mae" in selectedx:
-        x_box = df["EDUCACAO_MAE"]
+        x_2 = df["EDUCACAO_MAE"]
 
-#valores da axis y
+#valores da variável de desempenho
     if "total" in selectedy:
-        y_box = df["NU_NOTA_TOTAL"]
+        y_2 = df["NU_NOTA_TOTAL"]
     if "natureza" in selectedy:
-        y_box = df["NU_NOTA_CN"]
+        y_2 = df["NU_NOTA_CN"]
     if "matematica" in selectedy:
-        y_box = df["NU_NOTA_MT"]
+        y_2= df["NU_NOTA_MT"]
     if "linguagem" in selectedy:
-        y_box = df["NU_NOTA_LC"]
+        y_2 = df["NU_NOTA_LC"]
     if "humanas" in selectedy:
-        y_box = df["NU_NOTA_CH"]
+        y_2 = df["NU_NOTA_CH"]
     if "redacao" in selectedy:
-        y_box = df["NU_NOTA_REDACAO"]
+        y_2 = df["NU_NOTA_REDACAO"]
 
     return px.box(df,
-            x=y_box,
-            y=x_box,
-            color=x_box,
+            x=y_2,
+            y=x_2,
+            color=x_2,
             points="outliers",
             orientation="h", #se quisermos o normal, tirar essa parte e mudar x e y
             #range_x=[100,1000],
