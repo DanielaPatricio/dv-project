@@ -17,8 +17,11 @@ import plotly.offline as pyo
 import plotly.express as px
 from dash.dependencies import Input, Output
 
-app = dash.Dash()
 
+
+app = dash.Dash(__name__)
+
+server = app.server
 
 #importar dataset
 df = pd.read_csv("SAMPLE_ENEM3.csv", delimiter=",", encoding="utf8")
@@ -135,5 +138,6 @@ def update_figure(selectedx, selectedy):
                     "NU_NOTA_LC":"Nota Linguagens e Códigos", "NU_NOTA_MT":"Nota Matemática"
                    })
 
+#run the application
 if __name__ == '__main__':
     app.run_server()
