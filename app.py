@@ -116,8 +116,6 @@ app.layout = html.Div([
         ], className='card1 cards'),
 #Div 4 (boxplot)
         html.Div([
-
-            dcc.Markdown("boxplot"),
             dcc.Graph(id="boxplot"),
         ], className='card2 cards'),
     ],className="row"),
@@ -126,7 +124,6 @@ app.layout = html.Div([
 #Div 3 (heatmap & heatmap)
     html.Div([
         html.Div([
-            dcc.Markdown("Heatmap"),
             dcc.Graph(id="heatmap")
             ], className='card3 cards'),
         html.Div([
@@ -223,22 +220,22 @@ def update_figure(selectedx1, selectedy1):
 
     # valores da axis y
     if "total" in selectedy1:
-        z_heat = df["NU_NOTA_TOTAL"]
+        z_heat =  round(df["NU_NOTA_TOTAL"],2)
         disciplina = "Total"
     if "natureza" in selectedy1:
-        z_heat = df["NU_NOTA_CN"]
+        z_heat = round(df["NU_NOTA_CN"],2)
         disciplina = "Ciências da Natureza"
     if "matematica" in selectedy1:
-        z_heat = df["NU_NOTA_MT"]
+        z_heat = round(df["NU_NOTA_MT"],2)
         disciplina = "Matemática"
     if "linguagem" in selectedy1:
-        z_heat = df["NU_NOTA_LC"]
+        z_heat = round(df["NU_NOTA_LC"],2)
         disciplina = "Linguagens e Códigos"
     if "humanas" in selectedy1:
-        z_heat = df["NU_NOTA_CH"]
+        z_heat = round(df["NU_NOTA_CH"],2)
         disciplina = "Ciências Humanas"
     if "redacao" in selectedy1:
-        z_heat = df["NU_NOTA_REDACAO"]
+        z_heat = round(df["NU_NOTA_REDACAO"],2)
         disciplina = "Redação"
 
     heatmap = px.density_heatmap(df, x=x_heat,
@@ -265,19 +262,22 @@ def update_figure(selectedx1, selectedy1):
                                          "EDUCACAO_MAE": "Nível Educação Mãe",
                                          "NU_NOTA_TOTAL": "Nota Final", "NU_NOTA_CN": "Nota Ciências da Natureza",
                                          "NU_NOTA_CH": "Nota Ciências Humanas", "NU_NOTA_REDACAO": "Nota Redação",
-                                         "NU_NOTA_LC": "Nota Linguagens e Códigos", "NU_NOTA_MT": "Nota Matemática"
+                                         "NU_NOTA_LC": "Nota Linguagens e Códigos", "NU_NOTA_MT": "Nota Matemática",
+                                         "Regiao": "Região",
+                                         "color": "Nota Média"
                                          }
                                  )
 
 
 
     title2 = "Nota Média " + "<br>" + disciplina
+    title3 = "Região vs " + s
 
     fig2 = go.Figure(data=heatmap)
 
     fig2.update_layout(coloraxis_colorbar=dict(
         title=title2))
-
+    fig2.update_layout(title_text=title3, title_x=0.5)
     fig2.update_xaxes(title_text="", side="top")
     fig2.update_yaxes(title_text="")
 
@@ -335,14 +335,15 @@ def update_figure(selectedy):
 
 #configuração e apresentação do mapa
     return px.choropleth_mapbox(df_mapa, geojson=data_geo, locations=x, color=y_1,
-                                color_continuous_scale="Viridis",
-                                range_color=(minmed, maxmed),
-                                mapbox_style="carto-positron",
-                                center={"lat": -15.4357, "lon": -53.8510},
-                                zoom=2,
-                                opacity=0.5,
-                                labels={"locations": "Estado", "color": title2}
-                                )
+                         color_continuous_scale="Viridis",
+                         range_color=(minmed, maxmed),
+                         mapbox_style="carto-positron",
+                         center={"lat": -15.4357, "lon": -53.8510},
+                         zoom=2,
+                         opacity=0.5,
+                         labels={"locations": "Estado", "color": title2}
+                         )
+
 
 #run the application
 if __name__ == '__main__':
