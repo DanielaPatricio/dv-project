@@ -1,5 +1,4 @@
 #importar pacotes necessários
-
 import pandas as pd
 import dash
 import dash_core_components as dcc
@@ -13,10 +12,6 @@ import numpy as np
 import urllib.request, json
 import base64
 
-#iniciar app
-app = dash.Dash(__name__)
-
-server = app.server
 
 #importar dataset
 df = pd.read_csv("SAMPLE_ENEM3.csv", delimiter=",", encoding="utf8")
@@ -27,7 +22,7 @@ mapa = df[["SG_UF_RESIDENCIA", "Unidade federativa", "NU_NOTA_TOTAL", "NU_NOTA_R
 df_mapa = mapa.groupby(df["Unidade federativa"]).mean().reset_index()
 df_mapa.head()
 
-#caminho do geojson com o mapa do Brasil
+#caminho do geojson com o mapa dos estados brasileiros
 geo_path = 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson'
 
 #assignar o geojson a uma variável
@@ -42,8 +37,7 @@ for feature in data_geo['features']:
 image_filename = 'enemicon.png'
 encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
-#criar variáveis para usar nos dropdowns
-
+#variáveis para usar nos dropdown da variável socioeconómica
 x_escolhas = [
     {"label": "Classe Social", "value": "social"},
     {"label": "Tipo de Escola", "value": "escola"},
@@ -52,6 +46,7 @@ x_escolhas = [
     {"label": "Nível Educação Mãe", "value": "edu_mae"}
 ]
 
+#variáveis para usar nos dropdown da variável desempenho
 y_escolhas = [
     {"label": "Nota Total", "value": "total"},
     {"label": "Nota Redação", "value": "redacao"},
@@ -61,53 +56,70 @@ y_escolhas = [
     {"label": "Nota Ciências Humanas", "value": "humanas"}
 ]
 
+#iniciar app
+app = dash.Dash(__name__)
+
+server = app.server
+
 #app layout
 app.layout = html.Div([
 
-#titulo    
+#Div 2 (imagem, texto, dropdowns & boxplot)
+    html.Div([
 
-            html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode())),
+#Div 4 (imagem, texto & dropdowns)
+        html.Div([
 
-# espaçamento entre objectos
-            dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões alunos Brasileiros com fim a ingressar no Ensino Superior. "
+#logo ENEM 2017
+            html.Div([(html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), width="300"))], style={'textAlign': 'center'}),
+
+#logo texto
+            html.Div([
+                dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões alunos Brasileiros com fim a ingressar no Ensino Superior. "
                  "O objectivo deste dashboard é apresentar as diferenças ao nível do desempenho dos alunos nas suas variáveis socioeconómicas. "
-                 ),
-
+                     ),
 # espaçamento entre objectos
             html.Br(),
 
 #nome do dropdown 2
-             html.Label("Variável de Desempenho,"),
+            html.Label("Variável de Desempenho (Mapa, Boxplot & Heatmap)"),
 
 #dropdown 3
-             dcc.Dropdown(
-             id = "desempenho",
-             options=y_escolhas,
-             value="total"
-             ),
+            dcc.Dropdown(
+                id = "desempenho",
+                options=y_escolhas,
+                value="total"
+                ),
 # espaçamento entre objectos
-             html.Br(),
-
-#map
-            dcc.Graph(id="map"),
+            html.Br(),
 
 # nome do dropdown 2
-            html.Label("Variável Socioeconómica"),
+            html.Label("Variável Socioeconómica (Boxplot & Heatmap)"),
 
 #dropdown 2
             dcc.Dropdown(
-            id="socioeconomico",
-            options=x_escolhas,
-            value="social"
-            ),
+                id="socioeconomico",
+                options=x_escolhas,
+                value="social"
+                ),
+            ], style={'textAlign': 'left'}),
+        ], className='card1 cards'),
+#Div 4 (boxplot)
+        html.Div([
+            dcc.Graph(id="boxplot"),
+        ], className='card2 cards'),
+    ],className="row"),
 
 
-             dcc.Graph(id="boxplot"),
-
-
+#Div 3 (heatmap & heatmap)
+    html.Div([
+        html.Div([
+            dcc.Graph(id="map")
+            ], className='card3 cards'),
+    ],className="row"),
 ])
 
-#callback1
+#callbackmapa
 @app.callback(Output("map", "figure"),
              [Input("desempenho", "value")])
 
@@ -151,16 +163,19 @@ def update_figure(selectedy):
 
 #configuração e apresentação do mapa
     return px.choropleth_mapbox(df_mapa, geojson=data_geo, locations=x, color=y_1,
-                           color_continuous_scale="Viridis",
-                           range_color=(minmed, maxmed),
-                           mapbox_style="carto-positron",
-                           center={"lat": -15.4357, "lon": -53.8510},
-                           zoom=3.75,
-                           opacity=0.5,
-                           labels={"locations": "Estado", "color": "Nota Média"}
-                           )
+                                color_continuous_scale="Viridis",
+                                range_color=(minmed, maxmed),
+                                mapbox_style="carto-positron",
+                                center={"lat": -15.4357, "lon": -53.8510},
+                                title=dict(text="Nota Média por Estado",
+                                           x=0.5),
+                                zoom=2,
+                                opacity=0.5,
+                                labels={"locations": "Estado", "color": "Nota Média"}
 
-#callback2
+                                )
+
+#callbackboxplot
 @app.callback(Output("boxplot", "figure"),
              [Input("socioeconomico", "value"),
              Input("desempenho", "value")])
