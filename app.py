@@ -128,7 +128,7 @@ app.layout = html.Div([
             ], className='card3 cards'),
         html.Div([
             dcc.Markdown("Nota Média por Estado"),
-            dcc.Graph(id="map")
+            dcc.Graph(id="mapa")
             ], className='card4 cards'),
     ],className="row"),
 ])
@@ -181,6 +181,7 @@ def update_figure(selectedx, selectedy):
                      marker=dict(color="rgb(31,158,137)", opacity=0.2))
 
     layout_box = go.Layout(title=s + " vs " + n,
+                           title_x=0.5,
                            xaxis=dict(categoryorder="array", categoryarray=cat),
                            yaxis=dict(zeroline=False,
                                       gridcolor='rgb(242, 242, 242)'),
@@ -284,7 +285,7 @@ def update_figure(selectedx1, selectedy1):
     return fig2
 
 #callback mapa
-@app.callback(Output("map", "figure"),
+@app.callback(Output("mapa", "figure"),
              [Input("desempenho", "value")])
 
 def update_figure(selectedy):
@@ -334,7 +335,7 @@ def update_figure(selectedy):
     title2 = "Nota Média " + "<br>" + disciplina
 
 #configuração e apresentação do mapa
-    return px.choropleth_mapbox(df_mapa, geojson=data_geo, locations=x, color=y_1,
+    mapa = px.choropleth_mapbox(df_mapa, geojson=data_geo, locations=x, color=y_1,
                          color_continuous_scale="Viridis",
                          range_color=(minmed, maxmed),
                          mapbox_style="carto-positron",
@@ -344,6 +345,12 @@ def update_figure(selectedy):
                          labels={"locations": "Estado", "color": title2}
                          )
 
+    title3 = "Nota Média " + disciplina + " por Estado"
+
+    fig3 = go.Figure(data=mapa)
+    fig3.update_layout(title_text=title3, title_x=0.5)
+
+    return fig3
 
 #run the application
 if __name__ == '__main__':
