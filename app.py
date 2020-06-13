@@ -85,8 +85,8 @@ app.layout = html.Div([
 
 #logo texto
             html.Div([
-                dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões alunos Brasileiros com fim a ingressar no Ensino Superior. "
-                 "O objectivo deste dashboard é apresentar as diferenças ao nível do desempenho dos alunos nas suas variáveis socioeconómicas. "
+                dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões alunos Brasileiros com fim a ingressar no Ensino Superior.\n"
+                 "O objectivo deste dashboard é explorar as diferenças ao nível do desempenho dos alunos, no ENEM de 2017, através das suas variáveis socioeconómicas."
                      ),
 # espaçamento entre objectos
             html.Br(),
@@ -114,23 +114,29 @@ app.layout = html.Div([
                 ),
             ], style={'textAlign': 'left'}),
         ], className='card1 cards'),
+
 #Div 4 (boxplot)
         html.Div([
             dcc.Graph(id="boxplot"),
         ], className='card2 cards'),
     ],className="row"),
 
-
-#Div 3 (heatmap & heatmap)
+#Div 3 (heatmap & mapa)
     html.Div([
         html.Div([
             dcc.Graph(id="heatmap")
             ], className='card3 cards'),
         html.Div([
-            dcc.Markdown("Nota Média por Estado"),
             dcc.Graph(id="mapa")
             ], className='card4 cards'),
     ],className="row"),
+
+    html.Div([
+        html.H5(
+            "Desenvolvido por: Daniela Patrício [M20190400] & Giovanna Gehring [M2018067]",
+            style={"margin-top": "0px", "color": "white", 'textAlign': 'center'}
+        )
+    ])
 ])
 
 # callback boxplot
