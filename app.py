@@ -21,7 +21,7 @@ df['EDUCACAO_PAI'] = np.where(df['EDUCACAO_PAI'] == "Nunca estudou ou fundamenta
 df['EDUCACAO_MAE'] = np.where(df['EDUCACAO_MAE'] == "Nunca estudou ou fundamental incompleto", "Nunca estudou <br> ou fundamental <br> incompleto", df['EDUCACAO_MAE'])
 
 #df para o mapa
-mapa = df[["SG_UF_RESIDENCIA", "Unidade federativa", "NU_NOTA_TOTAL", "NU_NOTA_REDACAO", "NU_NOTA_CN","NU_NOTA_MT", "NU_NOTA_LC", "NU_NOTA_REDACAO"]]
+mapa = df[["SG_UF_RESIDENCIA", "Unidade federativa", "NU_NOTA_TOTAL", "NU_NOTA_REDACAO", "NU_NOTA_CN","NU_NOTA_MT", "NU_NOTA_LC", "NU_NOTA_CH"]]
 
 df_mapa = mapa.groupby(df["Unidade federativa"]).mean().reset_index()
 df_mapa.head()
@@ -143,6 +143,7 @@ app.layout = html.Div([
 @app.callback(Output("boxplot", "figure"),
               [Input("socioeconomico", "value"),
                Input("desempenho", "value")])
+
 def update_figure(selectedx, selectedy):
     # valores da axis x
     if "social" in selectedx:
@@ -207,6 +208,7 @@ def update_figure(selectedx, selectedy):
 @app.callback(Output("heatmap", "figure"),
               [Input("socioeconomico", "value"),
                Input("desempenho", "value")])
+
 def update_figure(selectedx1, selectedy1):
     # valores da axis x
     if "social" in selectedx1:
@@ -242,7 +244,7 @@ def update_figure(selectedx1, selectedy1):
         z_heat = df["NU_NOTA_CH"]
         disciplina = "Ciências Humanas"
     if "redacao" in selectedy1:
-        z_heat = ["NU_NOTA_REDACAO"]
+        z_heat = df["NU_NOTA_REDACAO"]
         disciplina = "Redação"
 
     heatmap = px.density_heatmap(df, x=x_heat,
@@ -264,13 +266,18 @@ def update_figure(selectedx1, selectedy1):
                                                                    "Ensino Fundamental",
                                                                    "Nunca estudou <br> ou fundamental <br> incompleto",
                                                                    "Não sei"]},
-                                 labels={"GRUPO_SOCIAL": "Classe Social", "TIPO_ESCOLA": "Tipo de Escola",
-                                         "TP_COR_RACA": "Raça", "EDUCACAO_PAI": "Nível Educação Pai",
+                                 labels={"GRUPO_SOCIAL": "Classe Social",
+                                         "TIPO_ESCOLA": "Tipo de Escola",
+                                         "TP_COR_RACA": "Raça",
+                                         "EDUCACAO_PAI": "Nível Educação Pai",
                                          "EDUCACAO_MAE": "Nível Educação Mãe",
-                                         "NU_NOTA_TOTAL": "Nota Média Final", "NU_NOTA_CN": "Nota Média Ciências da Natureza",
-                                         "NU_NOTA_CH": "Nota Média Ciências Humanas", "NU_NOTA_REDACAO": "Nota Média Redação",
-                                         "NU_NOTA_LC": "Nota Média Linguagens e Códigos", "NU_NOTA_MT": "Nota Média Matemática",
-                                         "Regiao": "Região"}
+                                         "NU_NOTA_TOTAL": "Nota Final",
+                                         "NU_NOTA_CN": "Nota Ciências da Natureza",
+                                         "NU_NOTA_CH": "Nota Ciências Humanas",
+                                         "NU_NOTA_REDACAO": "Nota Redação",
+                                         "NU_NOTA_LC": "Nota Linguagens e Códigos",
+                                         "NU_NOTA_MT": "Nota Matemática"
+                                        }
                                  )
 
 
