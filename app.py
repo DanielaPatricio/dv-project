@@ -3,15 +3,12 @@ import pandas as pd
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
 import plotly.graph_objs as go
-import plotly.offline as pyo
 import plotly.express as px
 from dash.dependencies import Input, Output
 import numpy as np
 import urllib.request, json
 import base64
-
 
 #importar dataset
 df = pd.read_csv("SAMPLE_ENEM3.csv", delimiter=",", encoding="utf8")
@@ -85,8 +82,7 @@ app.layout = html.Div([
 
 #logo texto
             html.Div([
-                dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões alunos Brasileiros com fim a ingressar no Ensino Superior.\n"
-                 "O objectivo deste dashboard é explorar as diferenças ao nível do desempenho dos alunos, no ENEM de 2017, através das suas variáveis socioeconómicas."
+                dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões de alunos Brasileiros com fim a ingressar no Ensino Superior. O presente dashboard possibilita a exploração das diferenças ao nível do desempenho dos alunos, no ENEM de 2017, através das suas variáveis socioeconómicas."
                      ),
 # espaçamento entre objectos
             html.Br(),
@@ -131,12 +127,13 @@ app.layout = html.Div([
             ], className='card4 cards'),
     ],className="row"),
 
-    html.Div([
-        html.H5(
-            "Desenvolvido por: Daniela Patrício [M20190400] & Giovanna Gehring [M2018067]",
-            style={"margin-top": "0px", "color": "white", 'textAlign': 'center'}
-        )
-    ])
+    html.Footer([
+        html.Label([
+            "Desenvolvido por: Daniela Patrício [M20190400] & Giovanna Gehring [M2018067] | ",
+            html.A("GitHub Repository",
+               href="https://github.com/DanielaPatricio/dv-project", target="_blank", style={"color": "yellow"})])
+    ],className="footer"),
+
 ])
 
 # callback boxplot
@@ -184,15 +181,15 @@ def update_figure(selectedx, selectedy):
 
     boxplot = go.Box(x=x_box,
                      y=y_box,
-                     # orientation="h",
                      marker=dict(color="rgb(31,158,137)", opacity=0.2))
 
-    layout_box = go.Layout(title=s + " vs " + n,
+    layout_box = go.Layout(title= n+ " por " + s,
                            title_x=0.5,
                            xaxis=dict(categoryorder="array", categoryarray=cat),
                            yaxis=dict(zeroline=False,
                                       gridcolor='rgb(242, 242, 242)'),
                            plot_bgcolor='rgb(255, 255, 255)',
+                           yaxis_title=n,
                            margin=dict(
                                l=40,
                                r=30,
@@ -276,21 +273,21 @@ def update_figure(selectedx1, selectedy1):
                                          "NU_NOTA_CH": "Nota Ciências Humanas",
                                          "NU_NOTA_REDACAO": "Nota Redação",
                                          "NU_NOTA_LC": "Nota Linguagens e Códigos",
-                                         "NU_NOTA_MT": "Nota Matemática"
+                                         "NU_NOTA_MT": "Nota Matemática",
+                                         "Regiao" : "Região",
                                         }
                                  )
 
 
     title2 = "Nota Média " + "<br>" + disciplina
-    title3 = "Região vs " + s
+    title3 = "Nota Média " + disciplina + " por Região e " + s
 
     fig2 = go.Figure(data=heatmap)
 
     fig2.update_layout(coloraxis_colorbar=dict(
         title=title2))
     fig2.update_layout(title_text=title3, title_x=0.5)
-    fig2.update_xaxes(title_text="", side="top")
-    fig2.update_yaxes(title_text="")
+    fig2.update_xaxes(title="")
 
     return fig2
 
