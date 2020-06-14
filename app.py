@@ -167,13 +167,13 @@ def update_figure(selectedx, selectedy):
         n = "Nota Total"
     if "natureza" in selectedy:
         y_box = df["NU_NOTA_CN"]
-        n = "Nota Ciências Naturais"
+        n = "Nota Ciências da Natureza"
     if "matematica" in selectedy:
         y_box = df["NU_NOTA_MT"]
         n = "Nota Matemática"
     if "linguagem" in selectedy:
         y_box = df["NU_NOTA_LC"]
-        n = "Nota Linguagens"
+        n = "Nota Linguagens e Códigos"
     if "humanas" in selectedy:
         y_box = df["NU_NOTA_CH"]
         n = "Nota Ciências Humanas"
@@ -227,22 +227,22 @@ def update_figure(selectedx1, selectedy1):
 
     # valores da axis y
     if "total" in selectedy1:
-        z_heat =  round(df["NU_NOTA_TOTAL"],2)
+        z_heat = df["NU_NOTA_TOTAL"]
         disciplina = "Total"
     if "natureza" in selectedy1:
-        z_heat = round(df["NU_NOTA_CN"],2)
+        z_heat = df["NU_NOTA_CN"]
         disciplina = "Ciências da Natureza"
     if "matematica" in selectedy1:
-        z_heat = round(df["NU_NOTA_MT"],2)
+        z_heat = df["NU_NOTA_MT"]
         disciplina = "Matemática"
     if "linguagem" in selectedy1:
-        z_heat = round(df["NU_NOTA_LC"],2)
+        z_heat = df["NU_NOTA_LC"]
         disciplina = "Linguagens e Códigos"
     if "humanas" in selectedy1:
-        z_heat = round(df["NU_NOTA_CH"],2)
+        z_heat = df["NU_NOTA_CH"]
         disciplina = "Ciências Humanas"
     if "redacao" in selectedy1:
-        z_heat = round(df["NU_NOTA_REDACAO"],2)
+        z_heat = ["NU_NOTA_REDACAO"]
         disciplina = "Redação"
 
     heatmap = px.density_heatmap(df, x=x_heat,
@@ -267,14 +267,11 @@ def update_figure(selectedx1, selectedy1):
                                  labels={"GRUPO_SOCIAL": "Classe Social", "TIPO_ESCOLA": "Tipo de Escola",
                                          "TP_COR_RACA": "Raça", "EDUCACAO_PAI": "Nível Educação Pai",
                                          "EDUCACAO_MAE": "Nível Educação Mãe",
-                                         "NU_NOTA_TOTAL": "Nota Final", "NU_NOTA_CN": "Nota Ciências da Natureza",
-                                         "NU_NOTA_CH": "Nota Ciências Humanas", "NU_NOTA_REDACAO": "Nota Redação",
-                                         "NU_NOTA_LC": "Nota Linguagens e Códigos", "NU_NOTA_MT": "Nota Matemática",
-                                         "Regiao": "Região",
-                                         "color": "Nota Média"
-                                         }
+                                         "NU_NOTA_TOTAL": "Nota Média Final", "NU_NOTA_CN": "Nota Média Ciências da Natureza",
+                                         "NU_NOTA_CH": "Nota Média Ciências Humanas", "NU_NOTA_REDACAO": "Nota Média Redação",
+                                         "NU_NOTA_LC": "Nota Média Linguagens e Códigos", "NU_NOTA_MT": "Nota Média Matemática",
+                                         "Regiao": "Região"}
                                  )
-
 
 
     title2 = "Nota Média " + "<br>" + disciplina
@@ -347,7 +344,7 @@ def update_figure(selectedy):
                          mapbox_style="carto-positron",
                          center={"lat": -15.4357, "lon": -53.8510},
                          zoom=2,
-                         opacity=0.5,
+                         opacity=0.75,
                          labels={"locations": "Estado", "color": title2}
                          )
 
