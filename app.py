@@ -129,7 +129,7 @@ app.layout = html.Div([
 
     html.Footer([
         html.Label([
-            "Desenvolvido por: Daniela Patrício [M20190400] & Giovanna Gehring [M2018067] | ",
+            "Desenvolvido por: Daniela Patrício [M20190400] & Giovanna Gehring [M20180867] | ",
             html.A("GitHub Repository",
                href="https://github.com/DanielaPatricio/dv-project", target="_blank", style={"color": "yellow"})])
     ],className="footer"),
