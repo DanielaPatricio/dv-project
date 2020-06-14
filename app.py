@@ -82,7 +82,7 @@ app.layout = html.Div([
 
 #logo texto
             html.Div([
-                dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões de alunos Brasileiros com fim a ingressar no Ensino Superior. O presente dashboard possibilita a exploração das diferenças ao nível do desempenho dos alunos, no ENEM de 2017, através das suas variáveis socioeconómicas."
+                dcc.Markdown("O Exame Nacional do Ensino Médio (ENEM) é realizado anualmente por milhões de alunos brasileiros com fim a ingressar no Ensino Superior. O presente dashboard possibilita a exploração das diferenças ao nível do desempenho dos alunos, no ENEM de 2017, através das suas variáveis socioeconómicas."
                      ),
 # espaçamento entre objectos
             html.Br(),
